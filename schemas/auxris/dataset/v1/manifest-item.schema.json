@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://auxris.org/schemas/auxris/dataset/v1/manifest-item.schema.json",
+  "title": "Auxris Dataset Manifest Item v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["item_id", "media_uri"],
+  "properties": {
+    "item_id": { "type": "string", "minLength": 1, "maxLength": 500 },
+    "media_uri": { "type": "string", "format": "uri", "maxLength": 4096 },
+    "media_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "intended_use": { "type": "string", "minLength": 1, "maxLength": 200 }
+  }
+}
