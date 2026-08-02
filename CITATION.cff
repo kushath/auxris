@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If Auxris supports your research, please cite the software release you used."
+title: "Auxris: Open audio provenance search"
+type: software
+authors:
+  - name: "Auxris contributors"
+repository-code: "https://github.com/satoshi-kris/auxris"
+url: "https://github.com/satoshi-kris/auxris"
+license: Apache-2.0
+version: 0.1.0-alpha.1
+date-released: 2026-08-02
+

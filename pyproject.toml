@@ -1,0 +1,83 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "auxris"
+version = "0.1.0a1"
+description = "Open-source audio provenance search for catalogs you control."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+authors = [{ name = "Auxris contributors" }]
+keywords = ["audio", "fingerprinting", "provenance", "content-authenticity", "c2pa"]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Multimedia :: Sound/Audio :: Analysis",
+]
+dependencies = [
+  "numpy>=2.0,<3",
+  "platformdirs>=4.3,<5",
+  "rich>=13.9,<15",
+  "scipy>=1.14,<2",
+  "soundfile>=0.13,<1",
+  "typer>=0.16,<1",
+]
+
+[project.optional-dependencies]
+server = [
+  "fastapi>=0.116,<1",
+  "python-multipart>=0.0.31,<1",
+  "uvicorn[standard]>=0.35,<1",
+]
+
+[project.scripts]
+auxris = "auxris.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/satoshi-kris/auxris"
+Documentation = "https://github.com/satoshi-kris/auxris/tree/main/docs"
+Issues = "https://github.com/satoshi-kris/auxris/issues"
+
+[dependency-groups]
+dev = [
+  "httpx>=0.28,<1",
+  "mypy>=1.17,<2",
+  "pip-audit>=2.9,<3",
+  "pytest>=9.0.3,<10",
+  "pytest-cov>=6.2,<8",
+  "ruff>=0.12,<1",
+  "scipy-stubs>=1.16.3,<2",
+  "types-cffi>=1.17,<2",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/auxris"]
+
+[tool.pytest.ini_options]
+addopts = "-q --strict-markers --cov=auxris --cov-report=term-missing"
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S", "SIM", "RUF"]
+ignore = ["S101"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+packages = ["auxris"]
+warn_unreachable = true
+
+[[tool.mypy.overrides]]
+module = ["soundfile"]
+ignore_missing_imports = true

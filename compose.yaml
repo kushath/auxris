@@ -1,0 +1,24 @@
+services:
+  auxris:
+    build: .
+    init: true
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      AUXRIS_API_KEY: ${AUXRIS_API_KEY:?Set AUXRIS_API_KEY in your environment or .env}
+      AUXRIS_ALLOWED_HOSTS: localhost,127.0.0.1
+      AUXRIS_MAX_UPLOAD_BYTES: "52428800"
+    volumes:
+      - auxris-data:/data
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+volumes:
+  auxris-data:
+

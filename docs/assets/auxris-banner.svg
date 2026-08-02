@@ -1,0 +1,20 @@
+<svg width="1200" height="360" viewBox="0 0 1200 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="50" y1="20" x2="1150" y2="340" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0A0913"/><stop offset="0.48" stop-color="#211449"/><stop offset="1" stop-color="#0B3546"/>
+    </linearGradient>
+    <linearGradient id="signal" x1="210" y1="90" x2="1030" y2="270" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#A98BFF"/><stop offset="0.5" stop-color="#55DFF3"/><stop offset="1" stop-color="#FF7FA4"/>
+    </linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="13" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="1200" height="360" rx="28" fill="url(#bg)"/>
+  <g opacity=".16" stroke="#CFCAEF"><path d="M0 80H1200M0 160H1200M0 240H1200M0 320H1200"/><path d="M120 0V360M240 0V360M360 0V360M480 0V360M600 0V360M720 0V360M840 0V360M960 0V360M1080 0V360"/></g>
+  <g filter="url(#glow)" fill="url(#signal)">
+    <rect x="136" y="158" width="10" height="44" rx="5"/><rect x="155" y="127" width="10" height="106" rx="5"/><rect x="174" y="91" width="10" height="178" rx="5"/><rect x="193" y="139" width="10" height="82" rx="5"/><rect x="212" y="163" width="10" height="34" rx="5"/>
+  </g>
+  <text x="270" y="170" fill="#F7F5FF" font-family="Arial, sans-serif" font-size="72" font-weight="700" letter-spacing="8">AUXRIS</text>
+  <text x="275" y="215" fill="#B7B1CE" font-family="Arial, sans-serif" font-size="20" letter-spacing="1.5">OPEN AUDIO PROVENANCE SEARCH</text>
+  <path d="M845 180C885 124 921 234 961 180C1001 126 1037 236 1077 180" stroke="url(#signal)" stroke-width="4" stroke-linecap="round"/>
+</svg>
+

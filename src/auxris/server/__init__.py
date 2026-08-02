@@ -1,0 +1,1 @@
+"""Optional authenticated FastAPI service."""

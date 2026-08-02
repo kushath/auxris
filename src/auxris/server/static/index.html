@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Auxris local audio provenance search console" />
+    <title>Auxris — Audio provenance search</title>
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script src="/static/app.js" defer></script>
+  </head>
+  <body>
+    <div class="noise" aria-hidden="true"></div>
+    <header class="shell nav">
+      <a class="brand" href="/" aria-label="Auxris home">
+        <span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        <span>AUXRIS</span>
+      </a>
+      <div class="status"><span id="status-dot"></span><span id="status-text">Connecting</span></div>
+    </header>
+
+    <main class="shell">
+      <section class="hero">
+        <p class="eyebrow">OPEN AUDIO PROVENANCE</p>
+        <h1>Know what your<br /><span>audio came from.</span></h1>
+        <p class="lede">
+          Match new audio against a catalog you control. Auxris returns aligned evidence and
+          registered usage policy—locally, transparently, and without a GPU.
+        </p>
+      </section>
+
+      <section class="control-card">
+        <div class="tabs" role="tablist">
+          <button class="tab active" data-panel="scan" role="tab">Scan audio</button>
+          <button class="tab" data-panel="register" role="tab">Register asset</button>
+          <button class="tab" data-panel="catalog" role="tab">Catalog</button>
+        </div>
+
+        <label class="key-field">
+          <span>Local API key</span>
+          <input id="api-key" type="password" autocomplete="off" placeholder="Paste the key printed by auxris serve" />
+        </label>
+
+        <form id="scan-panel" class="panel active">
+          <label class="drop-zone" for="scan-audio">
+            <input id="scan-audio" type="file" accept="audio/*" required />
+            <span class="drop-icon">↗</span>
+            <strong>Select audio to investigate</strong>
+            <small>WAV, FLAC, OGG and formats supported by your libsndfile installation</small>
+          </label>
+          <label class="field">
+            <span>Intended use <em>optional</em></span>
+            <input id="intended-use" placeholder="commercial-release" />
+          </label>
+          <button class="primary" type="submit">Run provenance scan <span>→</span></button>
+        </form>
+
+        <form id="register-panel" class="panel">
+          <div class="grid two">
+            <label class="field"><span>Asset ID</span><input id="asset-id" required placeholder="catalog:track:001" /></label>
+            <label class="field"><span>Title</span><input id="asset-title" placeholder="Original recording" /></label>
+            <label class="field"><span>Creator</span><input id="asset-creator" placeholder="Creator or organization" /></label>
+            <label class="field"><span>License</span><input id="asset-license" placeholder="CC-BY-4.0" /></label>
+          </div>
+          <label class="field"><span>Allowed uses</span><input id="allowed-uses" placeholder="research,commercial-release" /></label>
+          <label class="drop-zone compact" for="register-audio">
+            <input id="register-audio" type="file" accept="audio/*" required />
+            <strong>Select the reference audio</strong>
+          </label>
+          <button class="primary" type="submit">Register fingerprint <span>→</span></button>
+        </form>
+
+        <section id="catalog-panel" class="panel">
+          <div id="catalog-summary" class="metrics"></div>
+          <div id="catalog-list" class="catalog-list"></div>
+          <button id="refresh-catalog" class="secondary" type="button">Refresh catalog</button>
+        </section>
+      </section>
+
+      <section id="result" class="result" aria-live="polite"></section>
+
+      <section class="principles">
+        <article><span>01</span><h2>Evidence, not verdicts</h2><p>Aligned fingerprints and registered metadata, never automated legal conclusions.</p></article>
+        <article><span>02</span><h2>Your catalog</h2><p>Index assets locally. Original media does not need to leave your infrastructure.</p></article>
+        <article><span>03</span><h2>Inspectable by design</h2><p>An open algorithm, versioned evidence, and reproducible benchmarks.</p></article>
+      </section>
+    </main>
+
+    <footer class="shell"><span>Auxris v0.1 pre-alpha</span><a href="/docs">API reference ↗</a></footer>
+  </body>
+</html>

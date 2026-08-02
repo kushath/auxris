@@ -1,0 +1,25 @@
+name: Feature proposal
+description: Propose a use case or a narrowly scoped capability.
+title: "proposal: "
+labels: [proposal]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and user
+      description: Who experiences this problem, and what decision can they not make today?
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Example or evidence
+      description: Describe a real workflow, catalog, or non-sensitive fixture that could validate the proposal.
+    validations:
+      required: true
+  - type: textarea
+    id: approach
+    attributes:
+      label: Possible approach
+      description: Optional implementation or interoperability ideas.
+
