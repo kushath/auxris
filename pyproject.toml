@@ -33,7 +33,7 @@ dependencies = [
 server = [
   "fastapi>=0.116,<1",
   "python-multipart>=0.0.31,<1",
-  "uvicorn[standard]>=0.35,<1",
+  "uvicorn[standard]>=0.52.0,<1",
 ]
 
 [project.scripts]
