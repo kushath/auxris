@@ -53,7 +53,7 @@ dev = [
   "pytest-cov>=6.2,<8",
   "ruff>=0.12,<1",
   "scipy-stubs>=1.16.3,<2",
-  "types-cffi>=1.17,<2",
+  "types-cffi>=2.0.0.20260518,<3",
 ]
 
 [tool.hatch.build.targets.wheel]
