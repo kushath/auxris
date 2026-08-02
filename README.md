@@ -30,6 +30,15 @@ The next release is building the contracts needed for Dataset Guard and generati
 
 These interfaces are experimental until their RFCs are accepted and v0.2 is released. The [six-month implementation plan](docs/IMPLEMENTATION_PLAN.md) defines the evidence gates for each phase.
 
+## Phase 2B: Dataset Guard vertical slice
+
+The experimental [Dataset Guard](docs/DATASET_GUARD.md) API now provides digest-pinned JSONL
+manifests, a durable and resumable SQLite worker, tenant-scoped scan records, idempotent writes,
+explicit resource quotas, immutable evidence exports, cancellation, and append-only human review.
+It accepts only root-confined local files and uses the empty-by-default catalog controlled by the
+operator. Postgres/object storage, separate tenant catalogs, Croissant export, and production load
+objectives remain Phase 2B work.
+
 ## Why Auxris
 
 - **Evidence over opaque scores:** inspect aligned landmark votes and matching source/query regions.
@@ -96,10 +105,11 @@ Supported inputs depend on the installed `libsndfile`; WAV, FLAC, and OGG are th
 
 ```text
 src/auxris/core/       deterministic fingerprint, durable index, policy result
+src/auxris/dataset_guard/ durable scan state machine, evidence export, review history
 crates/auxris-core/     experimental Rust protocol kernel
 bindings/python/        optional Python 3.11+ native wheel
 benchmarks/             reproducible generated-audio evaluation entry point
-schemas/                versioned evidence, provenance, and policy contracts
+schemas/                versioned evidence, provenance, dataset, policy, and benchmark contracts
 src/auxris/server/     authenticated FastAPI adapter and local web console
 examples/              synthetic, license-safe demonstration
 tests/                 application and cross-language conformance tests
