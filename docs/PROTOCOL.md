@@ -18,5 +18,6 @@ The HTTP API is currently the canonical interoperability boundary. OpenAPI is ge
 
 ## Compatibility work before v0.2
 
-The project will publish a fixture manifest containing canonical PCM samples, expected fingerprints, serialization bytes, and match evidence. Python, future Rust/WASM, and SDK implementations must reproduce those fixtures before claiming compatibility.
+The normative landmark serialization and hash vectors now live in `tests/fixtures/constellation-v1.json` and are exercised by Python and Rust. Signal-level fixtures and match-evidence vectors remain required before v0.2 compatibility is declared.
 
+The proposed long-term contracts are recorded in [RFC-0001](rfcs/0001-evidence-taxonomy.md) and [RFC-0002](rfcs/0002-fingerprint-protocol.md). Until those RFCs are accepted, the Rust crate and schemas are experimental.

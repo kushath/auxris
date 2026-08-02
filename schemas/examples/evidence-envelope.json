@@ -1,0 +1,50 @@
+{
+  "schema_version": "auxris.evidence.v1",
+  "evidence_id": "ev_demo_01",
+  "scan_id": "scan_demo_01",
+  "created_at": "2026-08-02T12:00:00Z",
+  "subject": {
+    "kind": "dataset_asset",
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "media_type": "audio/wav",
+    "duration_seconds": 12.5,
+    "external_id": "dataset/item-0001"
+  },
+  "detector": {
+    "id": "auxris.constellation",
+    "version": "1.0.0",
+    "config_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "execution_mode": "embedded"
+  },
+  "findings": [
+    {
+      "type": "recording_segment_match",
+      "catalog_id": "catalog_demo",
+      "asset_id": "asset_demo",
+      "ranking_score": 0.94,
+      "aligned_votes": 42,
+      "query_fingerprints": 50,
+      "coverage": 0.84,
+      "offset_frames": 7,
+      "query_range": { "start_seconds": 0.46, "end_seconds": 8.31 },
+      "source_range": { "start_seconds": 0.79, "end_seconds": 8.64 }
+    }
+  ],
+  "provenance_refs": [
+    {
+      "kind": "auxris_asset",
+      "uri": "https://catalog.example/assets/asset_demo",
+      "verification_state": "self_asserted"
+    }
+  ],
+  "policy": {
+    "decision": "review",
+    "policy_id": "dataset-intake-default",
+    "policy_revision": "1",
+    "reason_codes": ["CATALOG_MATCH_REQUIRES_REVIEW"],
+    "explanation": "A strong recording match requires operator review."
+  },
+  "limitations": [
+    "The ranking score is not a probability of infringement or ownership."
+  ]
+}

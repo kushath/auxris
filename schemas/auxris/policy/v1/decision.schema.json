@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://auxris.org/schemas/auxris/policy/v1/decision.schema.json",
+  "title": "Auxris Policy Decision v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "decision", "policy_id", "policy_revision", "requested_action", "reason_codes", "obligations"],
+  "properties": {
+    "schema_version": { "const": "auxris.policy-decision.v1" },
+    "decision": { "enum": ["allow", "review", "quarantine", "block", "not_evaluated"] },
+    "policy_id": { "type": "string", "minLength": 1, "maxLength": 2048 },
+    "policy_revision": { "type": "string", "minLength": 1, "maxLength": 2048 },
+    "requested_action": { "type": "string", "minLength": 1, "maxLength": 2048 },
+    "reason_codes": { "type": "array", "items": { "type": "string", "minLength": 1, "maxLength": 2048 }, "maxItems": 100 },
+    "explanation": { "type": "string", "maxLength": 4096 },
+    "obligations": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type"],
+        "properties": {
+          "type": { "enum": ["human_review", "attribution", "delete_by", "notify", "retain_evidence"] },
+          "value": { "type": ["string", "number", "boolean", "null"] }
+        }
+      }
+    }
+  }
+}

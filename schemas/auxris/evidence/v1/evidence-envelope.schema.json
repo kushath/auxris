@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://auxris.org/schemas/auxris/evidence/v1/evidence-envelope.schema.json",
+  "title": "Auxris Evidence Envelope v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "evidence_id",
+    "scan_id",
+    "created_at",
+    "subject",
+    "detector",
+    "findings",
+    "policy",
+    "limitations"
+  ],
+  "properties": {
+    "schema_version": { "const": "auxris.evidence.v1" },
+    "evidence_id": { "$ref": "#/$defs/nonEmptyString" },
+    "scan_id": { "$ref": "#/$defs/nonEmptyString" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "subject": { "$ref": "#/$defs/subject" },
+    "detector": { "$ref": "#/$defs/detector" },
+    "findings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/finding" },
+      "maxItems": 10000
+    },
+    "provenance_refs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/provenanceRef" },
+      "default": [],
+      "maxItems": 1000
+    },
+    "policy": { "$ref": "#/$defs/policyDecision" },
+    "limitations": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/nonEmptyString" },
+      "maxItems": 100
+    },
+    "integrity": { "$ref": "#/$defs/integrity" }
+  },
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1, "maxLength": 2048 },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "sha256", "media_type"],
+      "properties": {
+        "kind": { "enum": ["input", "output", "dataset_asset"] },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "media_type": { "$ref": "#/$defs/nonEmptyString" },
+        "duration_seconds": { "type": "number", "minimum": 0 },
+        "external_id": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "detector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version", "config_sha256", "execution_mode"],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonEmptyString" },
+        "version": { "$ref": "#/$defs/nonEmptyString" },
+        "config_sha256": { "$ref": "#/$defs/sha256" },
+        "execution_mode": { "enum": ["embedded", "bounded_batch", "streaming", "remote_adapter"] }
+      }
+    },
+    "finding": {
+      "oneOf": [
+        { "$ref": "#/$defs/recordingMatch" },
+        { "$ref": "#/$defs/adapterFinding" }
+      ]
+    },
+    "recordingMatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "catalog_id", "asset_id", "ranking_score", "aligned_votes", "coverage", "query_range", "source_range"],
+      "properties": {
+        "type": { "const": "recording_segment_match" },
+        "catalog_id": { "$ref": "#/$defs/nonEmptyString" },
+        "asset_id": { "$ref": "#/$defs/nonEmptyString" },
+        "ranking_score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "aligned_votes": { "type": "integer", "minimum": 0 },
+        "query_fingerprints": { "type": "integer", "minimum": 0 },
+        "coverage": { "type": "number", "minimum": 0, "maximum": 1 },
+        "offset_frames": { "type": "integer" },
+        "query_range": { "$ref": "#/$defs/timeRange" },
+        "source_range": { "$ref": "#/$defs/timeRange" }
+      }
+    },
+    "adapterFinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "adapter_schema", "result"],
+      "properties": {
+        "type": {
+          "oneOf": [
+            { "enum": ["speaker_similarity", "watermark_detection", "content_credential", "operator_attestation"] },
+            { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*:[a-z0-9][a-z0-9._-]*$" }
+          ]
+        },
+        "adapter_schema": { "$ref": "#/$defs/nonEmptyString" },
+        "result": { "type": "object" }
+      }
+    },
+    "timeRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start_seconds", "end_seconds"],
+      "properties": {
+        "start_seconds": { "type": "number", "minimum": 0 },
+        "end_seconds": { "type": "number", "minimum": 0 }
+      }
+    },
+    "provenanceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "uri", "verification_state"],
+      "properties": {
+        "kind": { "enum": ["auxris_asset", "c2pa_manifest", "prov_entity", "odrl_policy", "external"] },
+        "uri": { "type": "string", "format": "uri", "maxLength": 4096 },
+        "verification_state": { "enum": ["unverified", "self_asserted", "verified", "revoked", "unknown"] }
+      }
+    },
+    "policyDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decision", "policy_id", "policy_revision", "reason_codes"],
+      "properties": {
+        "decision": { "enum": ["allow", "review", "quarantine", "block", "not_evaluated"] },
+        "policy_id": { "$ref": "#/$defs/nonEmptyString" },
+        "policy_revision": { "$ref": "#/$defs/nonEmptyString" },
+        "reason_codes": { "type": "array", "items": { "$ref": "#/$defs/nonEmptyString" }, "maxItems": 100 },
+        "explanation": { "type": "string", "maxLength": 4096 }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payload_sha256"],
+      "properties": {
+        "payload_sha256": { "$ref": "#/$defs/sha256" },
+        "signature_profile": { "$ref": "#/$defs/nonEmptyString" },
+        "signature": { "$ref": "#/$defs/nonEmptyString" },
+        "key_id": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    }
+  }
+}

@@ -17,9 +17,14 @@ uv run pytest
 uv run ruff check .
 uv run ruff format --check .
 uv run mypy src/auxris
+
+# When changing the native kernel:
+cargo fmt --all --check
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+cargo test --workspace --all-features
 ```
 
-Use Python 3.11 or newer. Commit `uv.lock` changes when dependencies change. Pull requests should include tests for behavior and update documentation for user-visible changes.
+Use Python 3.11 or newer and Rust 1.82 or newer. Commit `uv.lock` and `Cargo.lock` changes when dependencies change. Pull requests should include tests for behavior and update documentation for user-visible changes.
 
 ## Algorithm contributions
 
@@ -42,4 +47,3 @@ Auxris uses the [Developer Certificate of Origin 1.1](https://developercertifica
 ## Review expectations
 
 Maintainers may decline features that expand the attack surface or platform footprint before the core evidence is measured. One approving maintainer and green required checks are needed before merge. Security-sensitive changes require a second review when a second maintainer is available.
-
