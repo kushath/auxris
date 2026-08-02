@@ -13,11 +13,12 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
-from urllib.parse import unquote, urlparse
 
 from auxris import __version__
 from auxris.core.audio import AudioDecodeError
 from auxris.core.index import Catalog, CatalogError
+from auxris.core.tenant_catalog import CatalogProvider, StaticCatalogProvider
+from auxris.dataset_guard.storage import LocalFileObjectStore, ObjectStore, ObjectStoreError
 
 ScanState = Literal[
     "queued",
@@ -92,8 +93,11 @@ class DatasetGuard:
         database: str | Path,
         catalog: Catalog,
         *,
-        manifest_root: str | Path,
-        media_root: str | Path,
+        manifest_root: str | Path | None = None,
+        media_root: str | Path | None = None,
+        catalog_provider: CatalogProvider | None = None,
+        manifest_store: ObjectStore | None = None,
+        media_store: ObjectStore | None = None,
         max_manifest_bytes: int = 10 * 1024 * 1024,
         max_media_bytes: int = 2 * 1024 * 1024 * 1024,
         max_items_per_scan: int = 10_000,
@@ -101,8 +105,17 @@ class DatasetGuard:
     ) -> None:
         self.database = Path(database)
         self.catalog = catalog
-        self.manifest_root = Path(manifest_root).resolve()
-        self.media_root = Path(media_root).resolve()
+        self.catalog_provider = catalog_provider or StaticCatalogProvider(catalog)
+        if manifest_store is None:
+            if manifest_root is None:
+                raise ValueError("manifest_root or manifest_store is required")
+            manifest_store = LocalFileObjectStore(manifest_root, object_kind="manifest")
+        if media_store is None:
+            if media_root is None:
+                raise ValueError("media_root or media_store is required")
+            media_store = LocalFileObjectStore(media_root, object_kind="media")
+        self.manifest_store = manifest_store
+        self.media_store = media_store
         self.max_manifest_bytes = max_manifest_bytes
         self.max_media_bytes = max_media_bytes
         self.max_items_per_scan = max_items_per_scan
@@ -617,17 +630,17 @@ class DatasetGuard:
         policy_bundle: Mapping[str, Any],
     ) -> None:
         try:
-            media_path = self._resolve_file_uri(str(row["media_uri"]), self.media_root, "media")
-            if media_path.stat().st_size > self.max_media_bytes:
-                raise DatasetGuardQuotaExceeded("Media exceeds the configured byte limit")
-            media_sha256 = self._sha256_file(media_path)
-            expected = row["expected_sha256"]
-            if expected is not None and not hmac.compare_digest(media_sha256, str(expected)):
-                raise DatasetGuardError("Media SHA-256 does not match the manifest")
-            intended_use = row["intended_use"] or policy_bundle.get("intended_use")
-            if intended_use is not None and not isinstance(intended_use, str):
-                raise DatasetGuardError("policy_bundle.intended_use must be a string")
-            matches = self.catalog.identify_path(media_path, intended_use=intended_use)
+            with self.media_store.materialize(str(row["media_uri"]), self.max_media_bytes) as media:
+                media_sha256 = media.sha256
+                expected = row["expected_sha256"]
+                if expected is not None and not hmac.compare_digest(media_sha256, str(expected)):
+                    raise DatasetGuardError("Media SHA-256 does not match the manifest")
+                intended_use = row["intended_use"] or policy_bundle.get("intended_use")
+                if intended_use is not None and not isinstance(intended_use, str):
+                    raise DatasetGuardError("policy_bundle.intended_use must be a string")
+                catalog = self.catalog_provider.get_catalog(tenant_id)
+                matches = catalog.identify_path(media.path, intended_use=intended_use)
+                fingerprint_algorithm = catalog.fingerprinter.algorithm
             decision, reason_codes = self._decision_for_matches(matches)
             evidence_id = str(
                 uuid.uuid5(uuid.NAMESPACE_URL, f"auxris:{scan_id}:{row['item_id']}:{media_sha256}")
@@ -635,7 +648,7 @@ class DatasetGuard:
             config_sha256 = hashlib.sha256(
                 _canonical_json(
                     {
-                        "algorithm": self.catalog.fingerprinter.algorithm,
+                        "algorithm": fingerprint_algorithm,
                         "policy_bundle": policy_bundle,
                     }
                 ).encode()
@@ -666,7 +679,7 @@ class DatasetGuard:
                     "explanation": self._decision_explanation(decision, bool(matches)),
                 },
                 "limitations": [
-                    "Evidence is limited to the operator-controlled default catalog.",
+                    "Evidence is limited to the tenant's operator-controlled default catalog.",
                     "No match does not establish that an item is unprotected or safe to use.",
                     (
                         "The detector does not make copyright ownership or "
@@ -712,7 +725,13 @@ class DatasetGuard:
                         },
                     )
                 connection.commit()
-        except (AudioDecodeError, CatalogError, DatasetGuardError, OSError) as exc:
+        except (
+            AudioDecodeError,
+            CatalogError,
+            DatasetGuardError,
+            ObjectStoreError,
+            OSError,
+        ) as exc:
             with self._connection() as connection:
                 connection.execute("BEGIN IMMEDIATE")
                 cursor = connection.execute(
@@ -860,14 +879,12 @@ class DatasetGuard:
             return row is None or bool(row[0])
 
     def _load_manifest(self, uri: str, expected_sha256: str) -> list[ManifestItem]:
-        path = self._resolve_file_uri(uri, self.manifest_root, "manifest")
         try:
-            with path.open("rb") as handle:
-                payload = handle.read(self.max_manifest_bytes + 1)
-        except OSError as exc:
-            raise DatasetGuardError("The manifest URI is not readable") from exc
-        if len(payload) > self.max_manifest_bytes:
-            raise DatasetGuardQuotaExceeded("Manifest exceeds the configured byte limit")
+            payload = self.manifest_store.read_bytes(uri, self.max_manifest_bytes)
+        except ObjectStoreError as exc:
+            if "byte limit" in str(exc):
+                raise DatasetGuardQuotaExceeded(str(exc)) from exc
+            raise DatasetGuardError(str(exc)) from exc
         actual_sha256 = hashlib.sha256(payload).hexdigest()
         if not hmac.compare_digest(actual_sha256, expected_sha256):
             raise DatasetGuardError("Manifest SHA-256 does not match manifest_sha256")
@@ -898,7 +915,10 @@ class DatasetGuard:
                 raise DatasetGuardError(f"Manifest item_id is duplicated: {item_id}")
             if not isinstance(media_uri, str) or not media_uri or len(media_uri) > 4_096:
                 raise DatasetGuardError(f"Manifest line {line_number} has an invalid media_uri")
-            self._resolve_file_uri(media_uri, self.media_root, "media")
+            try:
+                self.media_store.validate_uri(media_uri)
+            except ObjectStoreError as exc:
+                raise DatasetGuardError(str(exc)) from exc
             media_sha = value.get("media_sha256")
             if media_sha is not None:
                 if not isinstance(media_sha, str):
@@ -924,32 +944,6 @@ class DatasetGuard:
         if not items:
             raise DatasetGuardError("Manifest must contain at least one item")
         return items
-
-    @staticmethod
-    def _resolve_file_uri(uri: str, root: Path, kind: str) -> Path:
-        parsed = urlparse(uri)
-        if parsed.scheme != "file" or parsed.netloc not in {"", "localhost"}:
-            raise DatasetGuardError(f"Only local file:// {kind} URIs are supported")
-        if parsed.query or parsed.fragment:
-            raise DatasetGuardError(f"The {kind} URI cannot contain a query or fragment")
-        try:
-            candidate = Path(unquote(parsed.path)).resolve(strict=True)
-        except (OSError, RuntimeError, ValueError) as exc:
-            raise DatasetGuardError(f"The {kind} URI does not resolve to a readable file") from exc
-        if not candidate.is_file() or not candidate.is_relative_to(root):
-            raise DatasetGuardError(f"The {kind} URI is outside its configured root")
-        return candidate
-
-    def _sha256_file(self, path: Path) -> str:
-        digest = hashlib.sha256()
-        total = 0
-        with path.open("rb") as handle:
-            while chunk := handle.read(1024 * 1024):
-                total += len(chunk)
-                if total > self.max_media_bytes:
-                    raise DatasetGuardQuotaExceeded("Media exceeds the configured byte limit")
-                digest.update(chunk)
-        return digest.hexdigest()
 
     @staticmethod
     def _validate_sha256(value: str, name: str) -> str:

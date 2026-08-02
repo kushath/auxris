@@ -15,10 +15,10 @@ partner integration; it is not yet the Phase 2B exit release.
   after symlink resolution.
 - The manifest SHA-256 is mandatory. Per-item media SHA-256 values are optional but recommended.
 - Manifest, media, item-count, policy-bundle, and active-queue limits are enforced before work.
-- API keys map to tenant IDs; scans, items, exports, reviews, and idempotency keys are tenant scoped.
-- The current `default` catalog is operator-owned and shared by the reference process. Separate
-  tenant catalogs are required before claiming the RFC's zero cross-tenant candidate-leakage exit
-  gate.
+- API keys map to tenant IDs; catalogs, candidates, scans, items, exports, reviews, deletion jobs,
+  and idempotency keys are tenant scoped.
+- Each tenant catalog is stored in a separate SQLite file. Non-default filenames use the full
+  SHA-256 tenant digest, so tenant IDs cannot become path components.
 - The worker does not fetch HTTP URLs, execute callbacks, or load plugins from manifest content.
 
 Treat the configured roots as trusted operator staging areas. Do not expose the reference server
@@ -45,10 +45,12 @@ not silently change policy behavior. The public item and export contracts live u
 | `AUXRIS_API_KEYS_JSON` | unset | JSON object mapping bearer keys to tenant IDs |
 | `AUXRIS_MANIFEST_ROOT` | `<database-dir>/manifests` | Permitted manifest root |
 | `AUXRIS_MEDIA_ROOT` | `<database-dir>/media` | Permitted media root |
+| `AUXRIS_TENANT_CATALOG_ROOT` | `<database-dir>/tenant-catalogs` | Isolated non-default catalogs |
 | `AUXRIS_MAX_MANIFEST_BYTES` | 10 MiB | Bounded manifest read |
 | `AUXRIS_MAX_MEDIA_BYTES` | 2 GiB | Per-item hashing/decoding ceiling |
 | `AUXRIS_MAX_SCAN_ITEMS` | 10,000 | Items accepted per scan |
 | `AUXRIS_MAX_QUEUED_SCANS` | 10 | Active scans accepted per tenant |
+| `AUXRIS_MAX_QUEUED_DELETIONS` | 100 | Active deletion jobs accepted per tenant |
 
 ## API workflow
 
@@ -60,13 +62,17 @@ not silently change policy behavior. The public item and export contracts live u
 4. Append a human outcome with `POST /v2/reviews/{evidence_id}/decisions`. This never rewrites
    detector evidence.
 5. Download the terminal result from `GET /v2/dataset-scans/{scan_id}/export.jsonl`.
+6. Queue logical deletion of a terminal scan or catalog asset with `POST /v2/deletions`, then poll
+   `GET /v2/deletions/{deletion_id}`. A failed job can be requeued with
+   `POST /v2/deletions/{deletion_id}/retry`.
 
 The SQLite worker claims queued scans atomically. On startup, interrupted `running` scans return to
 the queue and completed items are skipped, preventing duplicate evidence.
 
 ## Deliberate gaps
 
-Postgres and object-store interfaces, separate tenant catalogs, deletion jobs, callbacks,
-Croissant export, multiple workers under load, peak-memory reporting, and the 30-second queue SLO
-remain Phase 2B work. The transformation benchmark is still synthetic, and a no-match result never
-means that an item is unprotected or legally safe to train on.
+Postgres, remote object-store adapters, callbacks, Croissant export, multiple workers under load,
+peak-memory reporting, and the 30-second queue SLO remain Phase 2B work. Logical deletion does not
+erase external exports, backups, or storage snapshots; see [the upgrade guide](UPGRADING.md). The
+transformation benchmark is still synthetic, and a no-match result never means that an item is
+unprotected or legally safe to train on.

@@ -7,8 +7,9 @@ Current Phase 2A progress: the public schemas, rolling Rust kernel, optional Pyt
 Current Phase 2B progress: an experimental SQLite job state machine now provides digest-pinned
 local manifests, resumable item processing, tenant-scoped control records, idempotency, quotas,
 immutable JSONL evidence, cancellation, audit events, and append-only review decisions. Postgres
-and object-store interfaces, separate tenant catalogs, deletion jobs, Croissant export, load/SLO
-evidence, and partner evaluation remain before the phase exit.
+remains pending; tenant-separated catalogs, the object-store interface and local adapter, and
+resumable deletion jobs are implemented. Remote object stores, Croissant export, load/SLO evidence,
+and partner evaluation remain before the phase exit.
 
 ## Phase 2A — protocol foundation (weeks 1–8)
 

@@ -35,9 +35,10 @@ These interfaces are experimental until their RFCs are accepted and v0.2 is rele
 The experimental [Dataset Guard](docs/DATASET_GUARD.md) API now provides digest-pinned JSONL
 manifests, a durable and resumable SQLite worker, tenant-scoped scan records, idempotent writes,
 explicit resource quotas, immutable evidence exports, cancellation, and append-only human review.
-It accepts only root-confined local files and uses the empty-by-default catalog controlled by the
-operator. Postgres/object storage, separate tenant catalogs, Croissant export, and production load
-objectives remain Phase 2B work.
+It now separates each tenant's candidate catalog into its own SQLite file, exposes a pluggable
+object-store boundary with a root-confined local adapter, and provides resumable logical-deletion
+jobs. Postgres, remote object stores, Croissant export, and production load objectives remain
+Phase 2B work. Existing deployments should read the [upgrade guide](docs/UPGRADING.md).
 
 ## Why Auxris
 

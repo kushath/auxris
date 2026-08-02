@@ -31,7 +31,15 @@ The algorithm identifier is stored with every indexed asset. A future algorithm 
 
 ## Persistence
 
-SQLite is authoritative in v0.1. Asset replacement and its fingerprints are committed in one transaction. WAL mode supports concurrent readers and a single writer. Redis is intentionally absent; an optional cache must never be the only searchable copy.
+SQLite is authoritative in the reference profile. Asset replacement and its fingerprints are
+committed in one transaction. The default tenant keeps the legacy database; every other tenant is
+assigned a separate catalog file whose name is derived from the full SHA-256 tenant digest. WAL
+mode supports concurrent readers and a single writer. Redis is intentionally absent; an optional
+cache must never be the only searchable copy.
+
+Dataset Guard accesses manifests and media through an `ObjectStore` protocol. The bundled local
+adapter accepts only root-confined `file://` URIs. Scan and deletion queues are durable and recover
+interrupted jobs after restart.
 
 ## Provenance and policy
 
@@ -50,8 +58,7 @@ These are workflow signals, not legal opinions.
 
 - Signed C2PA manifest verification and soft-binding lookup.
 - Croissant import/export for audio dataset records.
-- Postgres and object-storage adapters.
+- Postgres control storage and remote object-storage adapters.
 - Versioned cross-language feature protocol and WASM extractor.
 - Optional learned reranking, always separated from deterministic evidence.
 - MCP and CI adapters that call the stable API rather than duplicate matching logic.
-

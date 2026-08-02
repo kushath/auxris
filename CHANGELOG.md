@@ -15,6 +15,9 @@ All notable changes will be documented here. The project follows semantic versio
 - Experimental Dataset Guard `/v2` job API with durable resumable scans, digest-pinned manifests,
   tenant-scoped records, immutable JSONL evidence, quotas, cancellation, and human review history.
 - Versioned Dataset Guard manifest-item and export-record JSON Schemas.
+- Tenant-separated candidate catalogs with hashed paths and cross-tenant leakage tests.
+- Pluggable Dataset Guard object-store protocol with a bounded, root-confined local adapter.
+- Resumable scan/catalog deletion jobs with digest-only tombstones and a public job schema.
 - Exact Python/Rust landmark and signal-level golden vectors.
 - Rust formatting, Clippy, tests, Dependabot coverage, and scheduled fuzzing.
 - Deterministic constellation fingerprint engine.

@@ -23,14 +23,23 @@ Uploads, catalog metadata, filenames, HTTP headers, media decoders, future outbo
 - Random temporary filenames and unconditional cleanup.
 - No URL ingestion, archive extraction, webhook dispatch, pickle, joblib, or remote model loading.
 - Parameterized SQL, transactional replacement, and foreign keys.
+- Bearer keys resolve to tenant-separated catalog files; tests exercise candidate and control-record
+  isolation through both identification and Dataset Guard.
+- Tenant IDs are hashed before catalog paths are constructed.
+- Root-confined object-store access, digest-pinned manifests, bounded materialization, and no
+  network fetcher.
+- Resumable logical deletion with raw target-ID redaction and digest-only tombstones.
 - Read-only container root, dropped capabilities, and dedicated data volume.
 
 ## Known limitations
 
 - Multipart parsing begins before the endpoint's streaming limit; deployers must also enforce a reverse-proxy body limit.
 - Audio decoding relies on libsndfile and should be isolated further for hostile public uploads.
-- API keys are single shared secrets in v0.1; there is no tenant identity, rotation API, or audit log.
+- API keys remain static shared secrets per tenant; there is no rotation or delegated-identity API.
 - SQLite is not suitable for untrusted multi-tenant hosting or large write concurrency.
+- Logical deletion cannot erase prior exports, backups, filesystem snapshots, or replicas.
+- Digest tombstones for predictable asset IDs can be dictionary guessed and are pseudonymous, not
+  anonymous.
 - Match thresholds are uncalibrated until the public benchmark corpus is established.
 - Catalog metadata is asserted, not cryptographically verified.
 
@@ -39,4 +48,3 @@ Uploads, catalog metadata, filenames, HTTP headers, media decoders, future outbo
 Do not expose a pre-alpha instance directly to the public internet. Terminate TLS at a maintained proxy, enforce body and request-rate limits there, restrict source networks where possible, use a generated secret, back up the catalog, and run the service as a non-root user.
 
 Report vulnerabilities through the private process in `SECURITY.md`, never through a public issue.
-
