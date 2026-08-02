@@ -22,9 +22,11 @@ The next release is building the contracts needed for Dataset Guard and generati
 
 - proposed evidence, provenance, policy, runtime, and benchmark [RFCs](docs/rfcs/README.md);
 - versioned [JSON Schemas](schemas/README.md) with a portable evidence example;
-- a resource-bounded Rust fingerprint kernel under `crates/auxris-core`;
+- a rolling, resource-bounded Rust fingerprint kernel under `crates/auxris-core`;
+- an optional ABI3 Python wheel under `bindings/python`;
 - exact Python/Rust conformance vectors, including a deterministic 1,097-fingerprint signal case;
-- scheduled fuzzing and native formatting, linting, and test gates.
+- a machine-readable, license-safe [transformation benchmark](docs/BENCHMARKING.md);
+- scheduled fuzzing and native formatting, linting, MSRV, and test gates.
 
 These interfaces are experimental until their RFCs are accepted and v0.2 is released. The [six-month implementation plan](docs/IMPLEMENTATION_PLAN.md) defines the evidence gates for each phase.
 
@@ -95,6 +97,8 @@ Supported inputs depend on the installed `libsndfile`; WAV, FLAC, and OGG are th
 ```text
 src/auxris/core/       deterministic fingerprint, durable index, policy result
 crates/auxris-core/     experimental Rust protocol kernel
+bindings/python/        optional Python 3.11+ native wheel
+benchmarks/             reproducible generated-audio evaluation entry point
 schemas/                versioned evidence, provenance, and policy contracts
 src/auxris/server/     authenticated FastAPI adapter and local web console
 examples/              synthetic, license-safe demonstration

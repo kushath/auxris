@@ -2,6 +2,8 @@
 
 This plan turns the v0.1 reference application into a testable audio trust platform while keeping a zero-cost embedded path. Dates are relative to project start and depend on maintainer capacity.
 
+Current Phase 2A progress: the public schemas, rolling Rust kernel, optional Python binding, cross-language signal vector, fuzz target, and generated-audio benchmark harness are implemented in the v0.2 draft. Match-evidence vectors and a partner-approved transformation corpus remain before the phase exit.
+
 ## Phase 2A — protocol foundation (weeks 1–8)
 
 - accept RFC-0001 through RFC-0005;

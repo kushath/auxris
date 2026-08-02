@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://auxris.org/schemas/auxris/benchmark/v1/report.schema.json",
+  "title": "Auxris Benchmark Report v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "benchmark_id", "corpus_sha256", "engine", "configuration", "metrics", "by_transformation", "cases", "limitations"],
+  "properties": {
+    "schema_version": { "const": "auxris.benchmark.v1" },
+    "benchmark_id": { "type": "string", "minLength": 1 },
+    "corpus_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "engine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["auxris_version", "fingerprint_algorithm", "implementation", "python_version", "numpy_version", "scipy_version", "platform", "architecture"],
+      "properties": {
+        "auxris_version": { "$ref": "#/$defs/nonEmptyString" },
+        "fingerprint_algorithm": { "$ref": "#/$defs/nonEmptyString" },
+        "implementation": { "$ref": "#/$defs/nonEmptyString" },
+        "python_version": { "$ref": "#/$defs/nonEmptyString" },
+        "numpy_version": { "$ref": "#/$defs/nonEmptyString" },
+        "scipy_version": { "$ref": "#/$defs/nonEmptyString" },
+        "platform": { "$ref": "#/$defs/nonEmptyString" },
+        "architecture": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "configuration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_count", "source_duration_seconds", "mean_query_duration_seconds", "seed", "minimum_votes", "minimum_coverage"],
+      "properties": {
+        "source_count": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "source_duration_seconds": { "type": "number", "minimum": 1, "maximum": 3600 },
+        "mean_query_duration_seconds": { "type": "number", "minimum": 0, "maximum": 600 },
+        "seed": { "type": "integer" },
+        "minimum_votes": { "type": "integer", "minimum": 1 },
+        "minimum_coverage": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "required": ["positive_queries", "negative_queries", "true_positives", "false_negatives", "false_positives", "precision", "recall", "false_matches_per_query_hour", "latency_ms_p50", "latency_ms_p95", "processed_audio_seconds", "wall_seconds", "audio_hours_per_wall_hour"],
+      "properties": {
+        "positive_queries": { "type": "integer", "minimum": 0 },
+        "negative_queries": { "type": "integer", "minimum": 0 },
+        "true_positives": { "type": "integer", "minimum": 0 },
+        "false_negatives": { "type": "integer", "minimum": 0 },
+        "false_positives": { "type": "integer", "minimum": 0 },
+        "precision": { "type": "number", "minimum": 0, "maximum": 1 },
+        "recall": { "type": "number", "minimum": 0, "maximum": 1 },
+        "false_matches_per_query_hour": { "type": "number", "minimum": 0 },
+        "latency_ms_p50": { "type": "number", "minimum": 0 },
+        "latency_ms_p95": { "type": "number", "minimum": 0 },
+        "processed_audio_seconds": { "type": "number", "minimum": 0 },
+        "wall_seconds": { "type": "number", "minimum": 0 },
+        "audio_hours_per_wall_hour": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "by_transformation": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/transformationResult" }
+    },
+    "cases": { "type": "array", "items": { "$ref": "#/$defs/case" } },
+    "limitations": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+  },
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1, "maxLength": 2048 },
+    "nullableString": { "type": ["string", "null"], "minLength": 1, "maxLength": 2048 },
+    "nullableInteger": { "type": ["integer", "null"] },
+    "nullableUnitInterval": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+    "transformationResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["queries", "correct", "recall"],
+      "properties": {
+        "queries": { "type": "integer", "minimum": 1 },
+        "correct": { "type": "integer", "minimum": 0 },
+        "recall": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["case_id", "transformation", "expected_asset_id", "matched_asset_id", "correct", "query_seconds", "query_sha256", "latency_ms", "fingerprints", "aligned_votes", "coverage"],
+      "properties": {
+        "case_id": { "$ref": "#/$defs/nonEmptyString" },
+        "transformation": { "$ref": "#/$defs/nonEmptyString" },
+        "expected_asset_id": { "$ref": "#/$defs/nullableString" },
+        "matched_asset_id": { "$ref": "#/$defs/nullableString" },
+        "correct": { "type": "boolean" },
+        "query_seconds": { "type": "number", "minimum": 0 },
+        "query_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "latency_ms": { "type": "number", "minimum": 0 },
+        "fingerprints": { "type": "integer", "minimum": 0 },
+        "aligned_votes": { "$ref": "#/$defs/nullableInteger" },
+        "coverage": { "$ref": "#/$defs/nullableUnitInterval" }
+      }
+    }
+  }
+}
