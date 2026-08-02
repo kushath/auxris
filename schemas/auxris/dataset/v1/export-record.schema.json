@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://auxris.org/schemas/auxris/dataset/v1/export-record.schema.json",
+  "title": "Auxris Dataset Scan JSONL Record v1",
+  "oneOf": [
+    { "$ref": "#/$defs/scan" },
+    { "$ref": "#/$defs/item" }
+  ],
+  "$defs": {
+    "nullableString": { "type": ["string", "null"] },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "scan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version", "record_type", "scan_id", "state", "manifest_uri",
+        "manifest_sha256", "catalog_ids", "policy_bundle", "detector_profile",
+        "total_items", "processed_items", "matched_items", "review_items",
+        "error_items", "cancellation_requested", "prior_scan_id", "last_error",
+        "created_at", "started_at", "completed_at"
+      ],
+      "properties": {
+        "schema_version": { "const": "auxris.dataset-scan.v1" },
+        "record_type": { "const": "scan" },
+        "scan_id": { "type": "string", "format": "uuid" },
+        "state": {
+          "enum": ["queued", "running", "completed", "completed_with_errors", "cancelled", "failed"]
+        },
+        "manifest_uri": { "type": "string", "format": "uri", "maxLength": 4096 },
+        "manifest_sha256": { "$ref": "#/$defs/sha256" },
+        "catalog_ids": {
+          "type": "array", "minItems": 1, "maxItems": 20,
+          "items": { "type": "string", "minLength": 1, "maxLength": 200 }
+        },
+        "policy_bundle": { "type": "object" },
+        "detector_profile": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "total_items": { "type": "integer", "minimum": 1 },
+        "processed_items": { "type": "integer", "minimum": 0 },
+        "matched_items": { "type": "integer", "minimum": 0 },
+        "review_items": { "type": "integer", "minimum": 0 },
+        "error_items": { "type": "integer", "minimum": 0 },
+        "cancellation_requested": { "type": "boolean" },
+        "prior_scan_id": { "$ref": "#/$defs/nullableString" },
+        "last_error": { "$ref": "#/$defs/nullableString" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "started_at": { "$ref": "#/$defs/nullableString" },
+        "completed_at": { "$ref": "#/$defs/nullableString" }
+      }
+    },
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version", "record_type", "ordinal", "item_id", "media_uri",
+        "expected_sha256", "media_sha256", "state", "evidence_id", "matched",
+        "decision", "evidence", "error", "completed_at", "review_decisions"
+      ],
+      "properties": {
+        "schema_version": { "const": "auxris.dataset-scan-item.v1" },
+        "record_type": { "const": "item" },
+        "ordinal": { "type": "integer", "minimum": 0 },
+        "item_id": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "media_uri": { "type": "string", "format": "uri", "maxLength": 4096 },
+        "expected_sha256": { "oneOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }] },
+        "media_sha256": { "oneOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }] },
+        "state": { "enum": ["pending", "completed", "error"] },
+        "evidence_id": { "$ref": "#/$defs/nullableString" },
+        "matched": { "type": "boolean" },
+        "decision": {
+          "type": ["string", "null"],
+          "enum": ["allow", "review", "quarantine", "block", "not_evaluated", null]
+        },
+        "evidence": { "type": ["object", "null"] },
+        "error": { "$ref": "#/$defs/nullableString" },
+        "completed_at": { "$ref": "#/$defs/nullableString" },
+        "review_decisions": {
+          "type": "array",
+          "maxItems": 10000,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["decision_id", "outcome", "reason", "reviewer", "created_at"],
+            "properties": {
+              "decision_id": { "type": "string", "format": "uuid" },
+              "outcome": { "enum": ["allow", "review", "quarantine", "block"] },
+              "reason": { "type": "string", "minLength": 1, "maxLength": 4096 },
+              "reviewer": { "$ref": "#/$defs/nullableString" },
+              "created_at": { "type": "string", "format": "date-time" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

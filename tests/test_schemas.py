@@ -17,12 +17,16 @@ def load_json(path: Path) -> dict[str, Any]:
 
 def test_public_schemas_have_stable_ids_and_versions() -> None:
     schemas = sorted((ROOT / "schemas" / "auxris").glob("**/*.schema.json"))
-    assert len(schemas) == 4
+    assert len(schemas) == 6
     for path in schemas:
         schema = load_json(path)
         assert schema["$schema"] == "https://json-schema.org/draft/2020-12/schema"
         assert schema["$id"].startswith("https://auxris.org/schemas/")
-        assert schema["additionalProperties"] is False
+        if "oneOf" in schema:
+            assert schema["$defs"]["scan"]["additionalProperties"] is False
+            assert schema["$defs"]["item"]["additionalProperties"] is False
+        else:
+            assert schema["additionalProperties"] is False
         Draft202012Validator.check_schema(schema)
 
 

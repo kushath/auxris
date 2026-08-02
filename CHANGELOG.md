@@ -12,6 +12,9 @@ All notable changes will be documented here. The project follows semantic versio
 - Rolling extraction that retains only STFT overlap, local spectra, and candidate peaks.
 - Optional `auxris-native` ABI3 wheel with batch and stateful NumPy interfaces.
 - Versioned synthetic transformation benchmark report and public failure baseline.
+- Experimental Dataset Guard `/v2` job API with durable resumable scans, digest-pinned manifests,
+  tenant-scoped records, immutable JSONL evidence, quotas, cancellation, and human review history.
+- Versioned Dataset Guard manifest-item and export-record JSON Schemas.
 - Exact Python/Rust landmark and signal-level golden vectors.
 - Rust formatting, Clippy, tests, Dependabot coverage, and scheduled fuzzing.
 - Deterministic constellation fingerprint engine.
