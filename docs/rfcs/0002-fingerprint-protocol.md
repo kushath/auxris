@@ -39,7 +39,7 @@ Floating-point ties may vary across FFT libraries. The Rust kernel therefore use
 
 ## Streaming profile
 
-A conforming streaming implementation may retain enough frames for the five-frame peak neighborhood and 60-frame pairing horizon. Chunk boundaries must not change output. `finish()` emits remaining buffered results. Buffering an entire bounded clip is allowed only in the `bounded-batch` execution mode and must enforce a caller-configured sample limit.
+A conforming streaming implementation may retain enough frames for the five-frame peak neighborhood and 60-frame pairing horizon. Chunk boundaries must not change output. Because v1's dB floor is relative to the complete subject maximum, the rolling reference extractor retains at most `peaks_per_frame` candidates per processed frame and emits hashes at `finish()`. It does not retain the complete PCM or spectrogram. Buffering an entire bounded clip is allowed only in the `bounded-batch` execution mode and must enforce a caller-configured sample limit.
 
 ## Security limits
 

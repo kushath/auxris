@@ -9,6 +9,9 @@ All notable changes will be documented here. The project follows semantic versio
 - Proposed RFCs for evidence semantics, fingerprint compatibility, consent policy, runtime architecture, and Dataset Guard acceptance.
 - Versioned JSON Schemas for portable evidence, asset provenance, and policy decisions.
 - Experimental `auxris-core` Rust kernel with hard sample/output limits and bounded chunk ingestion.
+- Rolling extraction that retains only STFT overlap, local spectra, and candidate peaks.
+- Optional `auxris-native` ABI3 wheel with batch and stateful NumPy interfaces.
+- Versioned synthetic transformation benchmark report and public failure baseline.
 - Exact Python/Rust landmark and signal-level golden vectors.
 - Rust formatting, Clippy, tests, Dependabot coverage, and scheduled fuzzing.
 - Deterministic constellation fingerprint engine.

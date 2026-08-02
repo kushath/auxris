@@ -38,6 +38,7 @@ server = [
 
 [project.scripts]
 auxris = "auxris.cli:app"
+auxris-benchmark = "auxris.evaluation.benchmark:main"
 
 [project.urls]
 Homepage = "https://github.com/satoshi-kris/auxris"
@@ -48,6 +49,7 @@ Issues = "https://github.com/satoshi-kris/auxris/issues"
 dev = [
   "httpx>=0.28,<1",
   "jsonschema>=4.25,<5",
+  "maturin>=1.9,<2",
   "mypy>=2.3.0,<3",
   "pip-audit>=2.9,<3",
   "pytest>=9.0.3,<10",

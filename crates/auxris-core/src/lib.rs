@@ -12,6 +12,10 @@ use blake2b_simd::Params;
 use rustfft::num_complex::Complex32;
 use rustfft::FftPlanner;
 
+mod stream;
+
+pub use stream::StreamingFingerprinter;
+
 /// Stable identifier for this fingerprint protocol.
 pub const ALGORITHM: &str = "auxris.constellation.v1";
 const PERSONALIZATION: &[u8; 8] = b"auxrisv1";
@@ -223,14 +227,10 @@ pub fn fingerprint_samples(
     pair_peaks(&peaks, config)
 }
 
-/// A bounded chunk accumulator whose output is independent of push boundaries.
-///
-/// This is the RFC-0002 `bounded-batch` mode. The true rolling streaming profile
-/// will replace the internal full-clip buffer without changing this call shape.
+/// Compatibility wrapper around the rolling extractor.
 #[derive(Debug)]
 pub struct BoundedBatchFingerprinter {
-    config: FingerprintConfig,
-    samples: Vec<f32>,
+    inner: StreamingFingerprinter,
 }
 
 impl BoundedBatchFingerprinter {
@@ -240,10 +240,8 @@ impl BoundedBatchFingerprinter {
     ///
     /// Returns [`FingerprintError::InvalidConfig`] for unsafe configuration.
     pub fn new(config: FingerprintConfig) -> Result<Self, FingerprintError> {
-        config.validate()?;
         Ok(Self {
-            config,
-            samples: Vec::new(),
+            inner: StreamingFingerprinter::new(config)?,
         })
     }
 
@@ -254,21 +252,7 @@ impl BoundedBatchFingerprinter {
     /// Returns [`FingerprintError::SampleLimitExceeded`] or
     /// [`FingerprintError::NonFiniteSample`] when the chunk is not acceptable.
     pub fn push(&mut self, chunk: &[f32]) -> Result<(), FingerprintError> {
-        let next_len = self.samples.len().checked_add(chunk.len()).ok_or(
-            FingerprintError::SampleLimitExceeded {
-                limit: self.config.max_samples,
-            },
-        )?;
-        if next_len > self.config.max_samples {
-            return Err(FingerprintError::SampleLimitExceeded {
-                limit: self.config.max_samples,
-            });
-        }
-        if chunk.iter().any(|sample| !sample.is_finite()) {
-            return Err(FingerprintError::NonFiniteSample);
-        }
-        self.samples.extend_from_slice(chunk);
-        Ok(())
+        self.inner.push(chunk)
     }
 
     /// Consume the accumulator and emit deterministic fingerprints.
@@ -278,12 +262,12 @@ impl BoundedBatchFingerprinter {
     /// Returns [`FingerprintError`] when final processing violates an input or
     /// output bound.
     pub fn finish(self) -> Result<Vec<Fingerprint>, FingerprintError> {
-        fingerprint_samples(&self.samples, &self.config)
+        self.inner.finish()
     }
 }
 
 #[allow(clippy::cast_precision_loss)]
-fn periodic_hann(length: usize) -> Vec<f32> {
+pub(crate) fn periodic_hann(length: usize) -> Vec<f32> {
     (0..length)
         .map(|index| 0.5 - 0.5 * (2.0 * PI * index as f32 / length as f32).cos())
         .collect()
@@ -349,7 +333,7 @@ fn find_peaks(db: &[Vec<f32>], config: &FingerprintConfig) -> Vec<(usize, u16)> 
     peaks
 }
 
-fn pair_peaks(
+pub(crate) fn pair_peaks(
     peaks: &[(usize, u16)],
     config: &FingerprintConfig,
 ) -> Result<Vec<Fingerprint>, FingerprintError> {
@@ -399,17 +383,21 @@ mod tests {
 
     #[test]
     #[allow(clippy::cast_precision_loss)]
-    fn chunk_boundaries_do_not_change_bounded_batch_output() {
+    fn rolling_chunks_match_the_batch_reference() {
         let config = FingerprintConfig::default();
         let samples: Vec<f32> = (0..config.sample_rate * 2)
             .map(|index| (2.0 * PI * 440.0 * index as f32 / config.sample_rate as f32).sin())
             .collect();
         let direct = fingerprint_samples(&samples, &config).expect("direct fingerprint");
-        let mut chunked = BoundedBatchFingerprinter::new(config).expect("valid config");
-        for chunk in samples.chunks(733) {
-            chunked.push(chunk).expect("bounded input");
+        for chunk_size in [1, 31, 512, 733, 4_096] {
+            let mut chunked = StreamingFingerprinter::new(config.clone()).expect("valid config");
+            for chunk in samples.chunks(chunk_size) {
+                chunked.push(chunk).expect("bounded input");
+                assert!(chunked.buffered_sample_count() < config.n_fft);
+                assert!(chunked.buffered_spectrum_count() <= 2 * config.peak_time_radius + 1);
+            }
+            assert_eq!(chunked.finish().expect("chunked fingerprint"), direct);
         }
-        assert_eq!(chunked.finish().expect("chunked fingerprint"), direct);
     }
 
     #[test]

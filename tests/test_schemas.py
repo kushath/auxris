@@ -17,7 +17,7 @@ def load_json(path: Path) -> dict[str, Any]:
 
 def test_public_schemas_have_stable_ids_and_versions() -> None:
     schemas = sorted((ROOT / "schemas" / "auxris").glob("**/*.schema.json"))
-    assert len(schemas) == 3
+    assert len(schemas) == 4
     for path in schemas:
         schema = load_json(path)
         assert schema["$schema"] == "https://json-schema.org/draft/2020-12/schema"

@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/auxris-core"]
+members = ["crates/auxris-core", "crates/auxris-python"]
 exclude = ["fuzz"]
 resolver = "2"
 
@@ -7,7 +7,7 @@ resolver = "2"
 edition = "2021"
 license = "Apache-2.0"
 repository = "https://github.com/satoshi-kris/auxris"
-rust-version = "1.82"
+rust-version = "1.85"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

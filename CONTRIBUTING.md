@@ -24,7 +24,7 @@ cargo clippy --workspace --all-targets --all-features -- -D warnings
 cargo test --workspace --all-features
 ```
 
-Use Python 3.11 or newer and Rust 1.82 or newer. Commit `uv.lock` and `Cargo.lock` changes when dependencies change. Pull requests should include tests for behavior and update documentation for user-visible changes.
+Use Python 3.11 or newer and Rust 1.85 or newer. Commit `uv.lock` and `Cargo.lock` changes when dependencies change. Pull requests should include tests for behavior and update documentation for user-visible changes.
 
 ## Algorithm contributions
 
