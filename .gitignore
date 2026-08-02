@@ -16,6 +16,8 @@ dist/
 build/
 /target/
 /fuzz/target/
+/bindings/python/*.so
+/bindings/python/*.pyd
 *.sqlite
 *.sqlite3
 *.db

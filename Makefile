@@ -1,4 +1,4 @@
-.PHONY: install check test lint rust-check format audit serve demo
+.PHONY: install check test lint rust-check native benchmark format audit serve demo
 
 install:
 	uv sync --all-extras --dev
@@ -17,6 +17,12 @@ rust-check:
 	cargo fmt --all --check
 	cargo clippy --workspace --all-targets --all-features -- -D warnings
 	cargo test --workspace --all-features
+
+native:
+	cd bindings/python && uv run --project ../.. maturin develop
+
+benchmark:
+	uv run auxris-benchmark
 
 format:
 	uv run ruff check --fix .
