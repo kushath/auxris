@@ -2,4 +2,7 @@
 
 /.github/ @satoshi-kris
 /src/auxris/core/ @satoshi-kris
+/crates/ @satoshi-kris
+/schemas/ @satoshi-kris
+/docs/rfcs/ @satoshi-kris
 /SECURITY.md @satoshi-kris

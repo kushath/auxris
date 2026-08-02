@@ -1,0 +1,19 @@
+[package]
+name = "auxris-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+auxris-core = { path = "../crates/auxris-core" }
+libfuzzer-sys = "0.4"
+
+[[bin]]
+name = "fingerprint"
+path = "fuzz_targets/fingerprint.rs"
+test = false
+doc = false
+bench = false

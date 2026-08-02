@@ -1,0 +1,50 @@
+{
+  "protocol": "auxris.constellation.v1",
+  "serialization": "three unsigned 16-bit big-endian integers",
+  "hash": "BLAKE2b-64",
+  "personalization": "auxrisv1",
+  "signal_case": {
+    "generator": "lcg32: state=1664525*state+1013904223; sample=((state>>16)-32768)/32768",
+    "seed": 305419896,
+    "sample_count": 16384,
+    "fingerprint_count": 1097,
+    "fingerprint_stream_blake2b_256": "85d008d9b2ccf521fe1db1d30d3f41388c25c6a4cd1fd2fcab9b393e9d79f6f5"
+  },
+  "normative_cases": [
+    {
+      "anchor_bin": 0,
+      "target_bin": 0,
+      "delta_frames": 1,
+      "payload_hex": "000000000001",
+      "hash_hex": "8cb42c598077ab73"
+    },
+    {
+      "anchor_bin": 10,
+      "target_bin": 20,
+      "delta_frames": 3,
+      "payload_hex": "000a00140003",
+      "hash_hex": "bab7fbdb5d9246d2"
+    },
+    {
+      "anchor_bin": 1024,
+      "target_bin": 511,
+      "delta_frames": 60,
+      "payload_hex": "040001ff003c",
+      "hash_hex": "0b60467c58a4fdba"
+    },
+    {
+      "anchor_bin": 440,
+      "target_bin": 880,
+      "delta_frames": 17,
+      "payload_hex": "01b803700011",
+      "hash_hex": "838aeec65171bba1"
+    },
+    {
+      "anchor_bin": 65535,
+      "target_bin": 65535,
+      "delta_frames": 65535,
+      "payload_hex": "ffffffffffff",
+      "hash_hex": "0447d61d1ecf50d9"
+    }
+  ]
+}

@@ -47,6 +47,7 @@ Issues = "https://github.com/satoshi-kris/auxris/issues"
 [dependency-groups]
 dev = [
   "httpx>=0.28,<1",
+  "jsonschema>=4.25,<5",
   "mypy>=2.3.0,<3",
   "pip-audit>=2.9,<3",
   "pytest>=9.0.3,<10",

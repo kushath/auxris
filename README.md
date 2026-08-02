@@ -16,6 +16,18 @@ Auxris is an open-source, local-first engine for comparing audio against a catal
 
 It is **not** a universal copyright database, an AI-generated-content detector, or a legal decision maker. If an asset is not in a connected catalog, Auxris cannot identify it.
 
+## Phase 2A: portable evidence foundation
+
+The next release is building the contracts needed for Dataset Guard and generation-time policy checks:
+
+- proposed evidence, provenance, policy, runtime, and benchmark [RFCs](docs/rfcs/README.md);
+- versioned [JSON Schemas](schemas/README.md) with a portable evidence example;
+- a resource-bounded Rust fingerprint kernel under `crates/auxris-core`;
+- exact Python/Rust conformance vectors, including a deterministic 1,097-fingerprint signal case;
+- scheduled fuzzing and native formatting, linting, and test gates.
+
+These interfaces are experimental until their RFCs are accepted and v0.2 is released. The [six-month implementation plan](docs/IMPLEMENTATION_PLAN.md) defines the evidence gates for each phase.
+
 ## Why Auxris
 
 - **Evidence over opaque scores:** inspect aligned landmark votes and matching source/query regions.
@@ -82,10 +94,12 @@ Supported inputs depend on the installed `libsndfile`; WAV, FLAC, and OGG are th
 
 ```text
 src/auxris/core/       deterministic fingerprint, durable index, policy result
+crates/auxris-core/     experimental Rust protocol kernel
+schemas/                versioned evidence, provenance, and policy contracts
 src/auxris/server/     authenticated FastAPI adapter and local web console
 examples/              synthetic, license-safe demonstration
-tests/                 persistence, matching, rejection, policy, and API tests
-docs/                  architecture, threat model, protocol, and roadmap
+tests/                 application and cross-language conformance tests
+docs/                  architecture, RFCs, threat model, protocol, and roadmap
 .github/                CI, CodeQL, dependency updates, and contribution forms
 ```
 
@@ -102,4 +116,3 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a change. Please report v
 ## License
 
 Apache License 2.0. Catalog metadata, media files, and third-party models retain their own licenses and are not relicensed merely by being processed with Auxris.
-

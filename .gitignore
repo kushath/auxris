@@ -14,6 +14,8 @@ htmlcov/
 .ruff_cache/
 dist/
 build/
+/target/
+/fuzz/target/
 *.sqlite
 *.sqlite3
 *.db
@@ -24,4 +26,3 @@ build/
 AUXRIS_AUDIT.md
 apps/
 .claude/
-
