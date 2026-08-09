@@ -26,14 +26,14 @@ dependencies = [
   "rich>=15.0.0,<16",
   "scipy>=1.14,<2",
   "soundfile>=0.13,<1",
-  "typer>=0.16,<1",
+  "typer>=0.27.1,<1",
 ]
 
 [project.optional-dependencies]
 server = [
   "fastapi>=0.116,<1",
   "python-multipart>=0.0.31,<1",
-  "uvicorn[standard]>=0.52.0,<1",
+  "uvicorn[standard]>=0.52.1,<1",
 ]
 
 [project.scripts]
